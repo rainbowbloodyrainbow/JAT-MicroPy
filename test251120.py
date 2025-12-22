@@ -1,6 +1,6 @@
-from machine import Pin, PWM
-import time
-print("Hello, ESP32!")
+# from machine import Pin, PWM
+# import time
+# print("Hello, ESP32!")
 # led = Pin(25,Pin.OUT)
 # led2 = Pin(4 ,Pin.OUT)
 
@@ -11,10 +11,10 @@ print("Hello, ESP32!")
 #     led.off()
 #     led2.value(not led.value())        
 #     time.sleep(0.25)    
-led_pwm = PWM(Pin(2),freq = 500)
-duty = 0
-step = 10
-delay = 0.02
+# led_pwm = PWM(Pin(2),freq = 500)
+# duty = 0
+# step = 10
+# delay = 0.02
 # direction = 1
 # while True:
 #     duty += step * direction
