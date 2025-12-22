@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": -51.77,
+      "left": 189.42,
+      "rotate": 90,
+      "attrs": { "env": "micropython-20220618-v1.19.1" }
+    },
+    { "type": "wokwi-ssd1306", "id": "oled1", "top": 151.5, "left": 249.01, "attrs": {} },
+    { "type": "board-ssd1306", "id": "oled2", "top": 160.33, "left": 133.12, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 28.27,
+      "left": 16.5,
+      "attrs": { "color": "green" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn2",
+      "top": 143.79,
+      "left": 16.51,
+      "attrs": { "color": "blue" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn3",
+      "top": 85.67,
+      "left": 16.5,
+      "attrs": { "color": "red" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "oled2:SDA", "esp:D21", "green", [ "v-21.57", "h106.72" ] ],
+    [ "oled2:SCL", "esp:D22", "green", [ "v-11.47", "h142.08" ] ],
+    [ "oled1:DATA", "esp:D21", "green", [ "v0" ] ],
+    [ "oled1:CLK", "esp:D22", "green", [ "v-19.01", "h18.95", "v-38.94" ] ],
+    [ "btn1:2.l", "btn3:2.l", "black", [ "h-22.61", "v56.12" ] ],
+    [ "btn2:2.l", "btn3:2.l", "black", [ "h-21.18", "v-57.96" ] ],
+    [ "esp:GND.1", "btn2:2.l", "black", [ "v23.25", "h-73", "v75.34", "h-109.78", "v-3.59" ] ],
+    [ "btn2:1.r", "esp:D23", "green", [ "v-18.16", "h0.79" ] ],
+    [ "btn3:1.r", "esp:D19", "green", [ "v-0.22", "h15.87", "v29.42", "h175.79" ] ],
+    [ "btn1:1.r", "esp:D18", "green", [ "v-0.22", "h28.78", "v71.03", "h153.55" ] ]
+  ],
+  "dependencies": {}
+}

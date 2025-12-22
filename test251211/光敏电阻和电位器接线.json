@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 26.32,
+      "left": 47.83,
+      "attrs": { "env": "micropython-20220618-v1.19.1" }
+    },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": 85.61, "left": 298.9, "attrs": {} },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr1",
+      "top": 14.63,
+      "left": -212.8,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "pot1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "pot1:VCC", "esp:3V3", "red", [ "v0" ] ],
+    [ "ldr1:GND", "esp:GND.1", "black", [ "h56.57", "v213.8", "h188.36", "v-74.06" ] ],
+    [ "ldr1:VCC", "esp:3V3", "red", [ "h41.94", "v237.52", "h233.16", "v-98.75" ] ],
+    [ "ldr1:AO", "esp:VN", "green", [ "h18.24", "v9.69" ] ],
+    [ "pot1:SIG", "esp:VP", "green", [ "v73.71", "h-348.69", "v-173.49" ] ]
+  ],
+  "dependencies": {}
+}
