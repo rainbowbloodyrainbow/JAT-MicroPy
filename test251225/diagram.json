@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": 0,
+      "left": 0,
+      "attrs": { "env": "micropython-20220618-v1.19.1" }
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht1",
+      "top": -51.52,
+      "left": -138.84,
+      "attrs": { "temperature": "26.2", "humidity": "13.5" }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": 8.9,
+      "left": 327.11,
+      "rotate": 180,
+      "attrs": { "color": "green" }
+    },
+    { "type": "wokwi-ssd1306", "id": "oled1", "top": 162.86, "left": 209.76, "attrs": {} },
+    {
+      "type": "wokwi-buzzer",
+      "id": "bz1",
+      "top": 5.65,
+      "left": -296.51,
+      "rotate": 270,
+      "attrs": { "volume": "0.1" }
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": 301.45,
+      "left": 23.74,
+      "rotate": 90,
+      "attrs": {}
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "oled1:DATA", "esp:D21", "green", [ "v0" ] ],
+    [ "oled1:CLK", "esp:D22", "green", [ "v0" ] ],
+    [ "dht1:VCC", "esp:3V3", "red", [ "v161.92", "h257.94", "v-65.5" ] ],
+    [ "dht1:SDA", "esp:D4", "green", [ "v146.88", "h277.7", "v-82.07" ] ],
+    [ "dht1:GND", "esp:GND.1", "black", [ "v173.51", "h240.08", "v-92.69" ] ],
+    [ "oled1:VIN", "esp:3V3", "red", [ "v0" ] ],
+    [ "oled1:GND", "esp:GND.1", "black", [ "v0" ] ],
+    [ "bz1:1", "esp:GND.1", "black", [ "v149.33", "h401.34", "v-68.07" ] ],
+    [
+      "bz1:2",
+      "esp:D15",
+      "green",
+      [ "h67.56", "v79.95", "h104.01", "v-143.78", "h219.23", "v140.72" ]
+    ],
+    [ "esp:D23", "btn1:2.r", "green", [ "h0" ] ],
+    [ "btn1:1.r", "esp:GND.1", "black", [ "v102.27", "h-5.46" ] ],
+    [ "servo1:GND", "esp:GND.1", "black", [ "v-30.48", "h63.93", "v-98.12" ] ],
+    [ "servo1:V+", "esp:3V3", "red", [ "v-55.02", "h24.37", "v-63.78" ] ],
+    [ "servo1:PWM", "esp:D13", "green", [ "v-17.01", "h-130.74", "v-114.2" ] ]
+  ],
+  "dependencies": {}
+}
