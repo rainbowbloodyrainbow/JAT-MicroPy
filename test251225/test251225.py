@@ -314,7 +314,7 @@ btn = Button(23)
 
 
 #配置舵机,使用
-servo = PWM(Pin(15),freq=50)
+servo = PWM(Pin(13),freq=50)
 # ----- 核心逻辑：伺服电机角度控制函数-----
 def set_servo_angle(angle):
     if 0 <= angle <= 180:
@@ -338,7 +338,6 @@ time.sleep(1) # 等待1秒，确保电机到位
 while True:
     temp, hum = read_sensor()
     if temp is not None and hum is not None:
-        print("温度: {}°C, 湿度: {}%".format(temp, hum))
         oled.fill(0)
         if temp < temp_highth:
             draw_chinese(oled, font16, '温度', 0, 12)
@@ -362,3 +361,5 @@ while True:
 time.sleep(2)  # DHT22要求至少2秒间隔
 
 
+#现阶段问题1：短按无法触发舵机旋转，原因未知。
+#现阶段问题2: 开头蜂鸣器自动发出声音，原因未知，在while循环之前加上stop_tone()解决。
