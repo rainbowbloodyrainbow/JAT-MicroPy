@@ -139,7 +139,3 @@ while True:
 #             display_two_numbers(str(tens), str(ones))
 #             # 这里可以添加一个短暂的延时，以便观察数字变化
 #             time.sleep(0.1)
-
-#现在的ai真是太强大了！
-#我甚至没在对话框问，只是在代码区问的，它也能理解我的意思并给出答案，太厉害了！    
-

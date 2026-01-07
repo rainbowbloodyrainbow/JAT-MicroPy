@@ -1,69 +1,69 @@
-# #任务四：任务三的基础上，增加一个 LED 灯，根据光敏电阻的光照等级调整 LED 亮度：
-# # Dark（黑暗）：LED 关闭
-# # Dim（昏暗）：LED 亮度为 25%，即duty=256
-# # Medium（中等）：LED 亮度为 50%，即duty=512
-# # Bright（明亮）：LED 亮度为 100%，即duty=1023
-# from machine import ADC, Pin,PWM
-# import time
+#任务四：任务三的基础上，增加一个 LED 灯，根据光敏电阻的光照等级调整 LED 亮度：
+# Dark（黑暗）：LED 关闭
+# Dim（昏暗）：LED 亮度为 25%，即duty=256
+# Medium（中等）：LED 亮度为 50%，即duty=512
+# Bright（明亮）：LED 亮度为 100%，即duty=1023
+from machine import ADC, Pin,PWM
+import time
 
-# # 初始化 ADC 引脚
-# pot_adc = ADC(Pin(36))   # 电位器接 GPIO36
-# ldr_adc = ADC(Pin(39))   # 光敏电阻接 GPIO39
-# led_pwm = PWM(Pin(21),freq = 500)
-# # 设置衰减为 11dB（支持 0~3.3V 输入）
-# pot_adc.atten(ADC.ATTN_11DB)
-# ldr_adc.atten(ADC.ATTN_11DB)
+# 初始化 ADC 引脚
+pot_adc = ADC(Pin(36))   # 电位器接 GPIO36
+ldr_adc = ADC(Pin(39))   # 光敏电阻接 GPIO39
+led_pwm = PWM(Pin(21),freq = 500)
+# 设置衰减为 11dB（支持 0~3.3V 输入）
+pot_adc.atten(ADC.ATTN_11DB)
+ldr_adc.atten(ADC.ATTN_11DB) 
 
-# # （可选）设置12位精度（ESP32 默认即为12位）
-# # pot_adc.width(ADC.WIDTH_12BIT)
-# # ldr_adc.width(ADC.WIDTH_12BIT)
+# （可选）设置12位精度（ESP32 默认即为12位）
+# pot_adc.width(ADC.WIDTH_12BIT)
+# ldr_adc.width(ADC.WIDTH_12BIT)
 
-# def read_pot():
-#     """读取电位器电压"""
-#     raw = pot_adc.read()
-#     voltage = raw * 3.3 / 4095
-#     return voltage, raw#raw是原始采样值
+def read_pot():
+    """读取电位器电压"""
+    raw = pot_adc.read()
+    voltage = raw * 3.3 / 4095
+    return voltage, raw#raw是原始采样值
 
+def read_ldr():
+    """读取光敏电阻并判断光照等级"""
+    raw = ldr_adc.read()
+    # 光敏特性：光照越强，阻值越小 → 分压越低 → raw 越小
+    if raw > 3000:
+        level = "Dark"
+        duty = 0
+    elif raw > 1500:
+        level = "Dim"
+        duty = 256
+    elif raw > 500:
+        level = "Medium"
+        duty = 512
+    else:
+        level = "Bright"
+        duty = 1023
+    #或者我们也可以根据raw值的范围来线性映射duty值，duty = int((4095 - raw) / 4095 * 1023)
+    return raw, level,duty
+
+#或者我们想要不用if判断，而是用ldr的数值直接映射到led的亮度，可以用下面的代码
 # def read_ldr():
-#     """读取光敏电阻并判断光照等级"""
+#     """读取光敏电阻并映射到LED亮度"""
 #     raw = ldr_adc.read()
-#     # 光敏特性：光照越强，阻值越小 → 分压越低 → raw 越小
-#     if raw > 3000:
-#         level = "Dark"
-#         duty = 0
-#     elif raw > 1500:
-#         level = "Dim"
-#         duty = 256
-#     elif raw > 500:
-#         level = "Medium"
-#         duty = 512
-#     else:
-#         level = "Bright"
-#         duty = 1023
-#     #或者我们也可以根据raw值的范围来线性映射duty值，duty = int((4095 - raw) / 4095 * 1023)
-#     return raw, level,duty
+#     # 将 raw 映射到 0-1023 范围
+#     
+#     return raw, duty
 
-# #或者我们想要不用if判断，而是用ldr的数值直接映射到led的亮度，可以用下面的代码
-# # def read_ldr():
-# #     """读取光敏电阻并映射到LED亮度"""
-# #     raw = ldr_adc.read()
-# #     # 将 raw 映射到 0-1023 范围
-# #     
-# #     return raw, duty
-
-# # 主循环
-# print("Reading Potentiometer and LDR...")
-# print("-" * 40)
-# while True:
-#     pot_v, pot_raw = read_pot()
-#     ldr_raw, light_level,duty = read_ldr()
-#     #pot_raw和ldr_raw有什么区别？答：pot_raw是电位器的原始ADC采样值，ldr_raw是光敏电阻的原始ADC采样值，它们分别反映了各自传感器的模拟输入电压水平
-#     print("Pot: {:.2f} V (Raw: {})".format(pot_v, pot_raw))
-#     print("LDR: Raw={} → {}".format(ldr_raw, light_level))
-#     print("Setting LED duty to: {}".format(duty))
-#     print("-" * 40)
-#     led_pwm.duty(duty)
-#     time.sleep(1)
+# 主循环
+print("Reading Potentiometer and LDR...")
+print("-" * 40)
+while True:
+    pot_v, pot_raw = read_pot()
+    ldr_raw, light_level,duty = read_ldr()
+    #pot_raw和ldr_raw有什么区别？答：pot_raw是电位器的原始ADC采样值，ldr_raw是光敏电阻的原始ADC采样值，它们分别反映了各自传感器的模拟输入电压水平
+    print("Pot: {:.2f} V (Raw: {})".format(pot_v, pot_raw))
+    print("LDR: Raw={} → {}".format(ldr_raw, light_level))
+    print("Setting LED duty to: {}".format(duty))
+    print("-" * 40)
+    led_pwm.duty(duty)
+    time.sleep(1)
 
 
 
