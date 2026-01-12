@@ -288,299 +288,300 @@
 
 
 
-# #任务七：仪表盘动态显示
-# import math
-# import time
-# from machine import Pin, I2C
-# import ssd1306
-
-# # 初始化 OLED (请根据你的实际引脚修改 SDA/SCL)
-# # 假设使用的是 ESP32 默认 I2C
-# i2c = I2C(0, scl=Pin(22), sda=Pin(21))
-# oled = ssd1306.SSD1306_I2C(128, 64, i2c)
-
-# # --- 1. 手动实现画圆函数 ---
-# def draw_circle(oled, x0, y0, radius, col=1):
-#     x = radius
-#     y = 0
-#     err = 0
-#     while x >= y:
-#         oled.pixel(x0 + x, y0 + y, col)
-#         oled.pixel(x0 + y, y0 + x, col)
-#         oled.pixel(x0 - y, y0 + x, col)
-#         oled.pixel(x0 - x, y0 + y, col)
-#         oled.pixel(x0 - x, y0 - y, col)
-#         oled.pixel(x0 - y, y0 - x, col)
-#         oled.pixel(x0 + y, y0 - x, col)
-#         oled.pixel(x0 + x, y0 - y, col)
-        
-#         y += 1
-#         if err <= 0:
-#             err += 2*y + 1
-#         else:
-#             x -= 1
-#             err += 2*(y-x) + 1
-
-# # --- 2. 修正后的仪表盘函数 ---
-# def draw_gauge(oled, value, min_val=0, max_val=100, x=64, y=32, radius=28):
-#     # 规范化值到 0-100
-#     norm_val = (value - min_val) / (max_val - min_val) * 100
-#     norm_val = max(0, min(100, norm_val))
-    
-#     # --- 绘制表盘外圈 ---
-#     draw_circle(oled, x, y, radius, 1)
-    
-#     # --- 绘制刻度 ---
-#     # 这里的角度逻辑：
-#     # math.pi (180度) 是左边 (9点钟方向)
-#     # 0 是右边 (3点钟方向)
-#     # math.pi/2 是上方 (12点钟方向)
-#     # 下面的公式是画一个从左(西)到右(东)的半圆拱形
-#     for i in range(0, 101, 10):
-#         # 刻度角度：从 180度(左) 转到 0度(右)
-#         angle = math.pi - (math.pi * i / 100)
-        
-#         tick_len = 3 # 刻度长度
-#         sx = int(x + (radius - tick_len) * math.cos(angle))
-#         sy = int(y - (radius - tick_len) * math.sin(angle)) # y轴在屏幕上是向下的，所以减去sin
-#         ex = int(x + radius * math.cos(angle))
-#         ey = int(y - radius * math.sin(angle))
-#         oled.line(sx, sy, ex, ey, 1)
-
-#     # --- 计算并绘制指针 ---
-#     # 注意：这里必须使用独立的变量名，不能和刻度循环里的变量混用
-#     # 指针角度
-#     needle_angle = math.pi - (math.pi * norm_val / 100)
-    
-#     needle_x = int(x + (radius - 5) * math.cos(needle_angle))
-#     needle_y = int(y - (radius - 5) * math.sin(needle_angle))
-    
-#     oled.line(x, y, needle_x, needle_y, 1)
-    
-#     # --- 显示数值 ---
-#     # 居中显示
-#     text = f"{int(value)}"
-#     text_x = x - (len(text) * 4) # 简易居中计算
-#     oled.text(text, text_x, y + 5)
-
-# # --- 主循环测试 ---
-# while True:
-#     # 模拟从 0 到 30 的变化
-#     for temp in range(0, 31, 2):
-#         oled.fill(0)
-#         # 将圆心向下移一点 (y=60)，形成拱形仪表盘
-#         draw_gauge(oled, temp, 0, 30, x=64, y=60, radius=30)
-#         oled.show()
-#         time.sleep_ms(50)
-        
-#     # 模拟回落
-#     for temp in range(30, -1, -2):
-#         oled.fill(0)
-#         draw_gauge(oled, temp, 0, 30, x=64, y=60, radius=30)
-#         oled.show()
-#         time.sleep_ms(50)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#任务八：贪吃蛇
+#任务七：仪表盘动态显示
+import math
+import time
 from machine import Pin, I2C
-from ssd1306 import SSD1306_I2C
-from utime import sleep_ms
-from random import randint
+import ssd1306
 
-# ESP32 Pin assignment 
+# 初始化 OLED (请根据你的实际引脚修改 SDA/SCL)
+# 假设使用的是 ESP32 默认 I2C
 i2c = I2C(0, scl=Pin(22), sda=Pin(21))
+oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
-up_btn   =Pin(2,Pin.IN,Pin.PULL_UP)
-down_btn =Pin(5, Pin.IN,Pin.PULL_UP)
-left_btn =Pin(15, Pin.IN,Pin.PULL_UP)
-right_btn=Pin(4, Pin.IN,Pin.PULL_UP)
-
-
-SCREEN_WIDTH        =128 # OLED display width, in pixels
-SCREEN_HEIGHT       =64  # OLED display height, in pixels
-
-SNAKE_PIECE_SIZE     =3
-MAX_SANKE_LENGTH     =165
-MAP_SIZE_X           =20
-MAP_SIZE_Y           =20
-STARTING_SNAKE_SIZE  =5
-SNAKE_MOVE_DELAY     =30
-
-SSD1306_INVERSE      =0
-SSD1306_WHITE        =1
-
-START               =0
-RUNNING             =1
-GAMEOVER            =2
-
-
-
-LEFT                =0
-UP                  =1
-RIGHT               =2
-DOWN                =3
-
-display = SSD1306_I2C(SCREEN_WIDTH ,SCREEN_HEIGHT , i2c)
-snake =[[0]*2 for _ in range(MAX_SANKE_LENGTH)] 
-
-fruit = [0]*2
-
-snake_length = 5
-
-gameState = START
-newDir = RIGHT
-
-def resetSnake():
-    snake_length = STARTING_SNAKE_SIZE
-    for i in range(snake_length):
-        snake[i][0] = MAP_SIZE_X // 2 - i
-        snake[i][1] = MAP_SIZE_Y // 2
-
-def generateFruit():
-    fruit[0] = randint(1, MAP_SIZE_X-1)
-    fruit[1] = randint(1, MAP_SIZE_Y-1)
-    for i in range(snake_length):
-        if fruit[0] == snake[i][0] and fruit[1] == snake[i][1]:
-            generateFruit()
-        else:
-            break
-def checkFruit():
-    global snake_length
-    if fruit[0] == snake[0][0] and fruit[1] == snake[0][1]:
-        if snake_length <= MAX_SANKE_LENGTH-1:
-            snake_length += 1
-        generateFruit()
- 
-def buttonPress():
-    global newDir
-    if up_btn.value()==0:
-        newDir = UP
-        return True
-    elif down_btn.value()==0:
-        newDir = DOWN
-        return True
-    elif left_btn.value()==0:
-        newDir = LEFT
-        return True
-    elif right_btn.value()==0:
-        newDir = RIGHT
-        return True
-    return False
-
-def drawMap():
-    offsetMapX = SCREEN_WIDTH - SNAKE_PIECE_SIZE * MAP_SIZE_X - 2
-    offsetMapY = 2
-
-    display.rect(fruit[0] * SNAKE_PIECE_SIZE + offsetMapX, fruit[1] * SNAKE_PIECE_SIZE + offsetMapY, SNAKE_PIECE_SIZE, SNAKE_PIECE_SIZE, SSD1306_WHITE)
-    display.rect(offsetMapX - 2, 0, SNAKE_PIECE_SIZE * MAP_SIZE_X + 4, SNAKE_PIECE_SIZE * MAP_SIZE_Y + 4, SSD1306_WHITE)
-    for i in range(snake_length):
-        display.fill_rect(snake[i][0] * SNAKE_PIECE_SIZE + offsetMapX, snake[i][1] * SNAKE_PIECE_SIZE + offsetMapY, SNAKE_PIECE_SIZE, SNAKE_PIECE_SIZE, SSD1306_WHITE) 
-
-def drawScore():
-    display.text('Score:', 0, 0)    
-    display.text(str(snake_length - STARTING_SNAKE_SIZE), 10, 12)    
-
-def drawPressToStart():
-    display.text("Press a",0,25)
-    display.text("button",0,35)
-    display.text("to",0,45)
-    display.text("start! ",0,55)
-
-def drawGameover():
-    display.text("GAME",0,45)
-    display.text(" OVER! ",0,55)
-
-
-def setupGame():
-    global snake_length
-    snake_length = 5
-    gameState = START
-    newDir = RIGHT
-    resetSnake()
-    generateFruit()
-    display.fill(0)
-    drawMap()
-    drawScore()
-    drawPressToStart()
-    display.show()
-
-def collisionCheck(x,y): 
-    for i in range(1,snake_length):
-        if x == snake[i][0] and y == snake[i][1]:
-            return True
-    if x < 0 or y < 0 or x >= MAP_SIZE_X or y >= MAP_SIZE_Y:
-        return True
-    return False
-
-def moveSnake(direction):
-    x = snake[0][0]
-    y = snake[0][1]
-
-    if direction==LEFT:
-        x -= 1
-    elif direction==UP:
-        y -= 1
-    elif direction==RIGHT:
-        x += 1
-    elif direction==DOWN:
+# --- 1. 手动实现画圆函数 ---
+def draw_circle(oled, x0, y0, radius, col=1): # draw_circle函数需要传入的参数有：oled对象，圆心坐标x0,y0，半径radius，颜色col
+    x = radius
+    y = 0
+    err = 0
+    while x >= y:
+        oled.pixel(x0 + x, y0 + y, col)
+        oled.pixel(x0 + y, y0 + x, col)
+        oled.pixel(x0 - y, y0 + x, col)
+        oled.pixel(x0 - x, y0 + y, col)
+        oled.pixel(x0 - x, y0 - y, col)
+        oled.pixel(x0 - y, y0 - x, col)
+        oled.pixel(x0 + y, y0 - x, col)
+        oled.pixel(x0 + x, y0 - y, col)
+        
         y += 1
+        if err <= 0:
+            err += 2*y + 1
+        else:
+            x -= 1
+            err += 2*(y-x) + 1
+
+# --- 2. 修正后的仪表盘函数 ---
+def draw_gauge(oled, value, min_val=0, max_val=100, x=64, y=32, radius=28): # draw_gauge函数需要传入的参数有：oled对象，当前值value，最小值min_val，最大值max_val，圆心坐标x,y，半径radius
+
+    # 规范化值到 0-100
+    norm_val = (value - min_val) / (max_val - min_val) * 100 # 规范化值
+    norm_val = max(0, min(100, norm_val))
     
-    if collisionCheck(x, y):
-        return True
+    # --- 绘制表盘外圈 ---
+    draw_circle(oled, x, y, radius, 1)
+    
+    # --- 绘制刻度 ---
+    # 这里的角度逻辑：
+    # math.pi (180度) 是左边 (9点钟方向)
+    # 0 是右边 (3点钟方向)
+    # math.pi/2 是上方 (12点钟方向)
+    # 下面的公式是画一个从左(西)到右(东)的半圆拱形
+    for i in range(0, 101, 10):
+        # 刻度角度：从 180度(左) 转到 0度(右)
+        angle = math.pi - (math.pi * i / 100)
+        
+        tick_len = 3 # 刻度长度
+        sx = int(x + (radius - tick_len) * math.cos(angle))
+        sy = int(y - (radius - tick_len) * math.sin(angle)) # y轴在屏幕上是向下的，所以减去sin
+        ex = int(x + radius * math.cos(angle))
+        ey = int(y - radius * math.sin(angle))
+        oled.line(sx, sy, ex, ey, 1)
 
-    for i in range(snake_length - 1,0,-1):
-        snake[i][0] = snake[i - 1][0]
-        snake[i][1] = snake[i - 1][1]
+    # --- 计算并绘制指针 ---
+    # 注意：这里必须使用独立的变量名，不能和刻度循环里的变量混用
+    # 指针角度
+    needle_angle = math.pi - (math.pi * norm_val / 100) # 指针角度为 norm_val 所占百分比的角度
+    
+    needle_x = int(x + (radius - 5) * math.cos(needle_angle))
+    needle_y = int(y - (radius - 5) * math.sin(needle_angle))
+    
+    oled.line(x, y, needle_x, needle_y, 1)
+    
+    # --- 显示数值 ---
+    # 居中显示
+    text = f"{int(value)}"
+    text_x = x - (len(text) * 4) # 简易居中计算
+    oled.text(text, text_x, y + 5)
 
-    snake[0][0] = x
-    snake[0][1] = y
-    return False
-
-moveTime = 0
-setupGame()
-
+# --- 主循环测试 ---
 while True:
-    if gameState==START:
-        if buttonPress():
-            gameState = RUNNING
-    elif gameState==RUNNING:
-        moveTime+=1
-        buttonPress()
-        if moveTime >= SNAKE_MOVE_DELAY:
-            display.fill(0)
-            if moveSnake(newDir):
-                gameState = GAMEOVER
-                drawGameover()
-                sleep_ms(1000)
-            drawMap()
-            drawScore()
-            display.show()
-            checkFruit()
-            moveTime = 0
-    elif  gameState==GAMEOVER:
-        if buttonPress():
-            setupGame()
-            gameState = START
-    sleep_ms(5)
+    # 模拟从 0 到 30 的变化
+    for temp in range(0, 31, 2):
+        oled.fill(0)
+        # 将圆心向下移一点 (y=60)，形成拱形仪表盘
+        draw_gauge(oled, temp, 0, 30, x=64, y=60, radius=30)
+        oled.show()
+        time.sleep_ms(50)
+        
+    # 模拟回落
+    for temp in range(30, -1, -2):
+        oled.fill(0)
+        draw_gauge(oled, temp, 0, 30, x=64, y=60, radius=30)
+        oled.show()
+        time.sleep_ms(50)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# #任务八：贪吃蛇
+# from machine import Pin, I2C
+# from ssd1306 import SSD1306_I2C
+# from utime import sleep_ms
+# from random import randint
+
+# # ESP32 Pin assignment 
+# i2c = I2C(0, scl=Pin(22), sda=Pin(21))
+
+# up_btn   =Pin(2,Pin.IN,Pin.PULL_UP)
+# down_btn =Pin(5, Pin.IN,Pin.PULL_UP)
+# left_btn =Pin(15, Pin.IN,Pin.PULL_UP)
+# right_btn=Pin(4, Pin.IN,Pin.PULL_UP)
+
+
+# SCREEN_WIDTH        =128 # OLED display width, in pixels
+# SCREEN_HEIGHT       =64  # OLED display height, in pixels
+
+# SNAKE_PIECE_SIZE     =3
+# MAX_SANKE_LENGTH     =165
+# MAP_SIZE_X           =20
+# MAP_SIZE_Y           =20
+# STARTING_SNAKE_SIZE  =5
+# SNAKE_MOVE_DELAY     =30
+
+# SSD1306_INVERSE      =0
+# SSD1306_WHITE        =1
+
+# START               =0
+# RUNNING             =1
+# GAMEOVER            =2
+
+
+
+# LEFT                =0
+# UP                  =1
+# RIGHT               =2
+# DOWN                =3
+
+# display = SSD1306_I2C(SCREEN_WIDTH ,SCREEN_HEIGHT , i2c)
+# snake =[[0]*2 for _ in range(MAX_SANKE_LENGTH)] 
+
+# fruit = [0]*2
+
+# snake_length = 5
+
+# gameState = START
+# newDir = RIGHT
+
+# def resetSnake():
+#     snake_length = STARTING_SNAKE_SIZE
+#     for i in range(snake_length):
+#         snake[i][0] = MAP_SIZE_X // 2 - i
+#         snake[i][1] = MAP_SIZE_Y // 2
+
+# def generateFruit():
+#     fruit[0] = randint(1, MAP_SIZE_X-1)
+#     fruit[1] = randint(1, MAP_SIZE_Y-1)
+#     for i in range(snake_length):
+#         if fruit[0] == snake[i][0] and fruit[1] == snake[i][1]:
+#             generateFruit()
+#         else:
+#             break
+# def checkFruit():
+#     global snake_length
+#     if fruit[0] == snake[0][0] and fruit[1] == snake[0][1]:
+#         if snake_length <= MAX_SANKE_LENGTH-1:
+#             snake_length += 1
+#         generateFruit()
+ 
+# def buttonPress():
+#     global newDir
+#     if up_btn.value()==0:
+#         newDir = UP
+#         return True
+#     elif down_btn.value()==0:
+#         newDir = DOWN
+#         return True
+#     elif left_btn.value()==0:
+#         newDir = LEFT
+#         return True
+#     elif right_btn.value()==0:
+#         newDir = RIGHT
+#         return True
+#     return False
+
+# def drawMap():
+#     offsetMapX = SCREEN_WIDTH - SNAKE_PIECE_SIZE * MAP_SIZE_X - 2
+#     offsetMapY = 2
+
+#     display.rect(fruit[0] * SNAKE_PIECE_SIZE + offsetMapX, fruit[1] * SNAKE_PIECE_SIZE + offsetMapY, SNAKE_PIECE_SIZE, SNAKE_PIECE_SIZE, SSD1306_WHITE)
+#     display.rect(offsetMapX - 2, 0, SNAKE_PIECE_SIZE * MAP_SIZE_X + 4, SNAKE_PIECE_SIZE * MAP_SIZE_Y + 4, SSD1306_WHITE)
+#     for i in range(snake_length):
+#         display.fill_rect(snake[i][0] * SNAKE_PIECE_SIZE + offsetMapX, snake[i][1] * SNAKE_PIECE_SIZE + offsetMapY, SNAKE_PIECE_SIZE, SNAKE_PIECE_SIZE, SSD1306_WHITE) 
+
+# def drawScore():
+#     display.text('Score:', 0, 0)    
+#     display.text(str(snake_length - STARTING_SNAKE_SIZE), 10, 12)    
+
+# def drawPressToStart():
+#     display.text("Press a",0,25)
+#     display.text("button",0,35)
+#     display.text("to",0,45)
+#     display.text("start! ",0,55)
+
+# def drawGameover():
+#     display.text("GAME",0,45)
+#     display.text(" OVER! ",0,55)
+
+
+# def setupGame():
+#     global snake_length
+#     snake_length = 5
+#     gameState = START
+#     newDir = RIGHT
+#     resetSnake()
+#     generateFruit()
+#     display.fill(0)
+#     drawMap()
+#     drawScore()
+#     drawPressToStart()
+#     display.show()
+
+# def collisionCheck(x,y): 
+#     for i in range(1,snake_length):
+#         if x == snake[i][0] and y == snake[i][1]:
+#             return True
+#     if x < 0 or y < 0 or x >= MAP_SIZE_X or y >= MAP_SIZE_Y:
+#         return True
+#     return False
+
+# def moveSnake(direction):
+#     x = snake[0][0]
+#     y = snake[0][1]
+
+#     if direction==LEFT:
+#         x -= 1
+#     elif direction==UP:
+#         y -= 1
+#     elif direction==RIGHT:
+#         x += 1
+#     elif direction==DOWN:
+#         y += 1
+    
+#     if collisionCheck(x, y):
+#         return True
+
+#     for i in range(snake_length - 1,0,-1):
+#         snake[i][0] = snake[i - 1][0]
+#         snake[i][1] = snake[i - 1][1]
+
+#     snake[0][0] = x
+#     snake[0][1] = y
+#     return False
+
+# moveTime = 0
+# setupGame()
+
+# while True:
+#     if gameState==START:
+#         if buttonPress():
+#             gameState = RUNNING
+#     elif gameState==RUNNING:
+#         moveTime+=1
+#         buttonPress()
+#         if moveTime >= SNAKE_MOVE_DELAY:
+#             display.fill(0)
+#             if moveSnake(newDir):
+#                 gameState = GAMEOVER
+#                 drawGameover()
+#                 sleep_ms(1000)
+#             drawMap()
+#             drawScore()
+#             display.show()
+#             checkFruit()
+#             moveTime = 0
+#     elif  gameState==GAMEOVER:
+#         if buttonPress():
+#             setupGame()
+#             gameState = START
+#     sleep_ms(5)

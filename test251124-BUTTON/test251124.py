@@ -68,7 +68,9 @@
 #     state = button.value()
 #     if state == 0:
 #         time.sleep_ms(10)
-#         if button.value() == 0:
+#         if button.value() == 0: # 如果10ms后还是0，则判定为按键按下
+#            # 人的反应速度肯定大于10ms，如果才经过10ms就变回1了，那说明肯定不是人在按按键，而是抖动
+#            # 福尔摩斯般的逻辑推理！
 #             return True
 #     return False
 
@@ -107,8 +109,8 @@
 #     if state == 0:
 #         counter += 1
 #         if counter > counter_max:
-#             return True
-#     return False
+#             return True # 一个函数只有一个return,这里if判断为真，返回True后，函数结束，则下面的return False不会执行
+#     return False 
 
 # while True:
 #     if key_scan():
@@ -200,7 +202,7 @@
 # 对于LONG_PRESS状态：延时500ms，若button.value() == 0，则转换为UP; 若button.value() == 1，则转换为LONG_UP
 # 初始状态为UP
 
-from machine import Pin
+from machine import Pin 
 import time
 
 button = Pin(22, Pin.IN, Pin.PULL_UP)
