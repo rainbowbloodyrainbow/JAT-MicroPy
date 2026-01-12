@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "author": "Anonymous maker",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-esp32-devkit-v1",
+      "id": "esp",
+      "top": -73.37,
+      "left": -62.87,
+      "attrs": { "env": "micropython-20220618-v1.19.1" }
+    },
+    { "type": "wokwi-ssd1306", "id": "oled1", "top": 73.51, "left": 174.06, "attrs": {} },
+    { "type": "wokwi-potentiometer", "id": "pot1", "top": -32.11, "left": -239.76, "attrs": {} },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "btn1",
+      "top": -80.4,
+      "left": 216.49,
+      "attrs": { "color": "green", "bounce": "0" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX0", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX0", "$serialMonitor:TX", "", [] ],
+    [ "oled1:CLK", "esp:D22", "green", [ "v0" ] ],
+    [ "oled1:DATA", "esp:D21", "green", [ "v0" ] ],
+    [ "oled1:VIN", "esp:3V3", "red", [ "v-13.41", "h-113.67", "v52.2" ] ],
+    [ "oled1:GND", "esp:GND.1", "black", [ "v-21.88", "h-132.65", "v43.23" ] ],
+    [ "pot1:SIG", "esp:D35", "green", [ "v20.59", "h69.27", "v-68.63" ] ],
+    [ "pot1:VCC", "esp:3V3", "red", [ "v102.63", "h265.81", "v-54.67" ] ],
+    [ "pot1:GND", "esp:GND.1", "black", [ "v116.5", "h301.32", "v-79.97" ] ],
+    [ "btn1:1.l", "esp:D23", "green", [ "h-130.18", "v12.11" ] ],
+    [ "btn1:2.l", "esp:GND.1", "black", [ "h-107.83", "v116.04" ] ]
+  ],
+  "dependencies": {}
+}
