@@ -24,9 +24,9 @@ i2c = I2C(0, sda=Pin(21), scl=Pin(22))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 oled.fill(0)
 Menu_state = 'FirstMenu_A'  # 初始状态
-btn_up = Pin(16, Pin.IN, Pin.PULL_UP)
-btn_dn = Pin(17, Pin.IN, Pin.PULL_UP)
-btn_ok = Pin(18, Pin.IN, Pin.PULL_UP)
+btn_up = Pin(19, Pin.IN, Pin.PULL_UP)
+btn_dn = Pin(18, Pin.IN, Pin.PULL_UP)
+btn_ok = Pin(5, Pin.IN, Pin.PULL_UP)
 
 while True:
     if Menu_state == 'FirstMenu_A':
